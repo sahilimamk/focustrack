@@ -16,7 +16,7 @@
     <artifactId>focustrack</artifactId>
     <version>1.0.0</version>
     <name>FocusTrack</name>
-    <description>Intelligent Pomodoro & Activity Monitoring System</description>
+    <description>Intelligent Pomodoro &amp; Activity Monitoring System</description>
     
     <properties>
         <java.version>17</java.version>
