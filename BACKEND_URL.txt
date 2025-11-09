@@ -1,0 +1,8 @@
+Backend URL: https://focustrack-production-68bf.up.railway.app
+API Base URL: https://focustrack-production-68bf.up.railway.app/api
+
+Use this URL for:
+1. Frontend environment variable: REACT_APP_API_URL=https://focustrack-production-68bf.up.railway.app/api
+2. Monitoring script: --api-url https://focustrack-production-68bf.up.railway.app
+3. Testing: https://focustrack-production-68bf.up.railway.app/api/sessions
+
