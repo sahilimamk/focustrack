@@ -1,0 +1,105 @@
+.reports {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.report-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.report-type-selector {
+  display: flex;
+  gap: 8px;
+}
+
+.report-type-selector button {
+  padding: 8px 16px;
+  border: 2px solid #667eea;
+  background: white;
+  color: #667eea;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+
+.report-type-selector button:hover {
+  background: #f0f0f0;
+}
+
+.report-type-selector button.active {
+  background: #667eea;
+  color: white;
+}
+
+.report-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stat-item {
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.stat-item label {
+  display: block;
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.stat-item value {
+  display: block;
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+}
+
+.apps-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.app-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border-radius: 8px;
+  border-left: 4px solid;
+}
+
+.app-item.productive {
+  background: #d4edda;
+  border-left-color: #28a745;
+}
+
+.app-item.distracting {
+  background: #f8d7da;
+  border-left-color: #dc3545;
+}
+
+.app-name {
+  font-weight: 600;
+  color: #333;
+  flex: 1;
+}
+
+.app-time {
+  color: #666;
+  margin: 0 16px;
+}
+
+.app-percentage {
+  font-weight: 600;
+  color: #333;
+}
+

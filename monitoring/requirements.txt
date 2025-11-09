@@ -1,0 +1,14 @@
+psutil>=5.9.0
+requests>=2.31.0
+
+# Windows-specific
+pywin32>=306; sys_platform == 'win32'
+
+# macOS-specific
+pyobjc>=10.0; sys_platform == 'darwin'
+
+# Linux-specific (optional, for xdotool integration)
+# xdotool must be installed via system package manager:
+# sudo apt-get install xdotool  # Ubuntu/Debian
+# sudo yum install xdotool      # RHEL/CentOS
+
