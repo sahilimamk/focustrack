@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './PomodoroTimer.css';
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8080/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
 
 function PomodoroTimer({ activeSession, onSessionUpdate }) {
   const [timeLeft, setTimeLeft] = useState(25 * 60); // 25 minutes in seconds
