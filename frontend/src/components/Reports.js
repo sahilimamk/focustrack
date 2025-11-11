@@ -63,8 +63,9 @@ function Reports() {
   const pieData = [
     { name: 'Productive', value: report.totalFocusTimeSeconds || 0 },
     { name: 'Distracting', value: report.totalDistractedTimeSeconds || 0 },
+    { name: 'Phone Distractions', value: report.totalPhoneDistractionsSeconds || 0 },
     { name: 'Neutral', value: report.totalNeutralTimeSeconds || 0 }
-  ];
+  ].filter(d => d.value > 0);
 
   const topAppsData = (report.topApps || []).slice(0, 5).map(app => ({
     name: app.appName.length > 15 ? app.appName.substring(0, 15) + '...' : app.appName,
@@ -186,4 +187,3 @@ function Reports() {
 }
 
 export default Reports;
-
