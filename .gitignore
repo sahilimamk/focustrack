@@ -77,4 +77,17 @@ Thumbs.db
 # Application specific
 monitoring/__pycache__/
 monitoring/*.pyc
+#Virtual environments
+.venv*/
+venv/
+env/
+
+# Python models and caches
+*.pt
+__pycache__/
+.pytest_cache/
+
+# OS-specific
+.DS_Store
+Thumbs.db
 
