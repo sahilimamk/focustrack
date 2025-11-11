@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './Dashboard.css';
 import axios from 'axios';
+// REMOVED: const { spawn } = require('child_process');
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
 
@@ -8,18 +9,29 @@ function Dashboard({ activeSession, onSessionUpdate }) {
   const [sessionName, setSessionName] = useState('');
   const [activities, setActivities] = useState([]);
   const [stats, setStats] = useState(null);
+  // REMOVED: monitorProc and isMonitoring states
 
   useEffect(() => {
     if (activeSession) {
       fetchActivities();
       fetchStats();
+
+      // Set up an interval to refresh activities and stats
+      const interval = setInterval(() => {
+        fetchActivities();
+        fetchStats();
+      }, 5000); // Refresh every 5 seconds
+
+      return () => clearInterval(interval); // Clean up on unmount
     }
   }, [activeSession]);
 
   const fetchActivities = async () => {
     if (!activeSession) return;
     try {
+      // Fetch session details which include activities
       const response = await axios.get(`${API_BASE_URL}/sessions/${activeSession.id}`);
+      // Ensure we have an array, even if activities is null
       setActivities(response.data.activities || []);
     } catch (error) {
       console.error('Error fetching activities:', error);
@@ -28,7 +40,11 @@ function Dashboard({ activeSession, onSessionUpdate }) {
 
   const fetchStats = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/reports/daily`);
+      // Get stats for today's date
+      const today = new Date().toISOString().split('T')[0];
+      const response = await axios.get(`${API_BASE_URL}/reports/daily`, {
+        params: { date: today }
+      });
       setStats(response.data);
     } catch (error) {
       console.error('Error fetching stats:', error);
@@ -37,10 +53,11 @@ function Dashboard({ activeSession, onSessionUpdate }) {
 
   const startSession = async () => {
     try {
-      await axios.post(`${API_BASE_URL}/sessions`, null, {
+      const response = await axios.post(`${API_BASE_URL}/sessions`, null, {
         params: { sessionName: sessionName || 'Focus Session' }
       });
-      onSessionUpdate();
+      // Pass the *new* session data (which is response.data) to the parent
+      onSessionUpdate(response.data);
       setSessionName('');
     } catch (error) {
       console.error('Error starting session:', error);
@@ -52,8 +69,10 @@ function Dashboard({ activeSession, onSessionUpdate }) {
     if (!activeSession) return;
     try {
       await axios.put(`${API_BASE_URL}/sessions/${activeSession.id}/end`);
-      onSessionUpdate();
+      // REMOVED: stopMonitor();
+      onSessionUpdate(null); // Clear the active session in App.js
       setActivities([]);
+      setStats(null);
     } catch (error) {
       console.error('Error ending session:', error);
       alert('Failed to end session');
@@ -63,8 +82,8 @@ function Dashboard({ activeSession, onSessionUpdate }) {
   const pauseSession = async () => {
     if (!activeSession) return;
     try {
-      await axios.put(`${API_BASE_URL}/sessions/${activeSession.id}/pause`);
-      onSessionUpdate();
+      const response = await axios.put(`${API_BASE_URL}/sessions/${activeSession.id}/pause`);
+      onSessionUpdate(response.data); // Update parent with new session status
     } catch (error) {
       console.error('Error pausing session:', error);
     }
@@ -73,19 +92,22 @@ function Dashboard({ activeSession, onSessionUpdate }) {
   const resumeSession = async () => {
     if (!activeSession) return;
     try {
-      await axios.put(`${API_BASE_URL}/sessions/${activeSession.id}/resume`);
-      onSessionUpdate();
+      const response = await axios.put(`${API_BASE_URL}/sessions/${activeSession.id}/resume`);
+      onSessionUpdate(response.data); // Update parent with new session status
     } catch (error) {
       console.error('Error resuming session:', error);
     }
   };
 
+  // REMOVED: startMonitor and stopMonitor functions
+
   const formatDuration = (seconds) => {
-    if (!seconds) return '0s';
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
-    
+    if (seconds === null || seconds === undefined) return '0s';
+    const totalSeconds = Math.floor(seconds);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const secs = totalSeconds % 60;
+
     if (hours > 0) {
       return `${hours}h ${minutes}m ${secs}s`;
     } else if (minutes > 0) {
@@ -99,6 +121,11 @@ function Dashboard({ activeSession, onSessionUpdate }) {
     if (!dateString) return '';
     return new Date(dateString).toLocaleTimeString();
   };
+
+  // Helper to find if the phone monitor has been active
+  const isPhoneMonitorActive = activities.some(
+    (act) => act.appName === "Phone (Webcam Detected)"
+  );
 
   return (
     <div className="dashboard">
@@ -123,7 +150,7 @@ function Dashboard({ activeSession, onSessionUpdate }) {
           <div>
             <div className="session-info">
               <h3>{activeSession.sessionName}</h3>
-              <span className={`session-status ${activeSession.status.toLowerCase()}`}>
+              <span className={`session-status ${activeSession.status?.toLowerCase()}`}>
                 {activeSession.status}
               </span>
               <p>Started: {formatTime(activeSession.startTime)}</p>
@@ -142,10 +169,29 @@ function Dashboard({ activeSession, onSessionUpdate }) {
                 End Session
               </button>
             </div>
+
+            {/* --- REVISED MONITOR SECTION --- */}
+            {activeSession.status !== 'ENDED' && (
+              <div className="monitor-instructions card-inset">
+                <h4><span role="img" aria-label="webcam">📹</span> Webcam Phone Monitor</h4>
+                <p>To detect phone distractions, run this command in your terminal:</p>
+                <code>
+                  python monitoring/activity_monitor.py --session-id {activeSession.id}
+                </code>
+                {isPhoneMonitorActive && (
+                    <p className="monitor-active-note">
+                      ✓ Phone distraction logged. Monitor appears to be working.
+                    </p>
+                )}
+              </div>
+            )}
+            {/* --- END REVISED SECTION --- */}
+
           </div>
         )}
       </div>
 
+      {/* --- Stats Grid --- */}
       {stats && (
         <div className="stats-grid">
           <div className="stat-card">
@@ -171,16 +217,19 @@ function Dashboard({ activeSession, onSessionUpdate }) {
         </div>
       )}
 
+      {/* --- Activities List --- */}
       {activeSession && activities.length > 0 && (
         <div className="card">
           <h2>Recent Activities</h2>
           <div className="activities-list">
+            {/* Show last 10, reversed (newest first) */}
             {activities.slice(-10).reverse().map((activity) => (
               <div key={activity.id} className="activity-item">
                 <div className="activity-info">
                   <strong>{activity.appName}</strong>
-                  <span className={`activity-type ${activity.type?.toLowerCase()}`}>
-                    {activity.type}
+                  {/* Updated: Check for phoneDetected flag or category */}
+                  <span className={`activity-type ${activity.category?.toLowerCase()}`}>
+                    {activity.phoneDetected ? "PHONE" : activity.category}
                   </span>
                 </div>
                 <div className="activity-details">
@@ -197,4 +246,3 @@ function Dashboard({ activeSession, onSessionUpdate }) {
 }
 
 export default Dashboard;
-

@@ -12,3 +12,21 @@ pyobjc>=10.0; sys_platform == 'darwin'
 # sudo apt-get install xdotool  # Ubuntu/Debian
 # sudo yum install xdotool      # RHEL/CentOS
 
+# For API calls
+requests==2.31.0
+
+# For process and system utilities
+psutil
+
+# For object detection
+ultralytics
+opencv-python
+numpy
+
+# --- Platform-specific (pip will skip unused ones) ---
+
+# For Windows monitoring
+pywin32; platform_system == "Windows"
+
+# For macOS monitoring
+pyobjc; platform_system == "Darwin"
